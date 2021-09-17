@@ -1,29 +1,65 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import Bubbles from "./Bubbles";
 import ColorList from "./ColorList";
 import fetchColorService from '../services/fetchColorService';
+import axios from "axios";
+import axiosWithAuth from "../helpers/axiosWithAuth";
 
-const BubblePage = () => {
-  const [colors, setColors] = useState([]);
-  const [editing, setEditing] = useState(false);
+class BubblePage extends React.Component {
+  state = {
+    colors: [],
+    editing: false
+  }
 
-  const toggleEdit = (value) => {
-    setEditing(value);
+  async componentDidMount() {
+    const response = await fetchColorService();
+    this.setState({
+      ...this.state,
+      colors: response
+    });
+  }
+
+  toggleEdit = (value) => {
+    this.setState({
+      ...this.state,
+      editing: value
+    })
   };
 
-  const saveEdit = (editColor) => {
+  saveEdit = (editColor) => {
+    axiosWithAuth()
+      .put(`colors/${editColor.id}`, editColor)
+      .then(resp => {
+        this.setState({
+          ...this.state,
+          colors: this.state.colors.map(color => 
+            color.id === editColor.id ? editColor : color
+          )
+        })
+      })
   };
 
-  const deleteColor = (colorToDelete) => {
+  deleteColor = (colorToDelete) => {
+    axiosWithAuth()
+      .delete(`colors/${colorToDelete.id}`)
+      .then(resp => {
+        this.setState({
+          ...this.state,
+          colors: this.state.colors.filter(color => (color.id !== colorToDelete.id))
+        })
+      })
   };
 
-  return (
-    <div className="container">
-      <ColorList colors={colors} editing={editing} toggleEdit={toggleEdit} saveEdit={saveEdit} deleteColor={deleteColor}/>
-      <Bubbles colors={colors}/>
-    </div>
-  );
+  render() {
+    return (
+      <div className="container">
+        {this.state.colors && <ColorList colors={this.state.colors} editing={this.state.editing} toggleEdit={this.toggleEdit} saveEdit={this.saveEdit} deleteColor={this.deleteColor} />}
+        {this.state.colors && <Bubbles colors={this.state.colors} />}
+
+      </div>
+    );
+  }
 };
 
 export default BubblePage;
