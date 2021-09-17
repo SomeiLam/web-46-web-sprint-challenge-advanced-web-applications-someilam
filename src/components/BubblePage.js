@@ -3,7 +3,7 @@ import React from "react";
 import Bubbles from "./Bubbles";
 import ColorList from "./ColorList";
 import fetchColorService from '../services/fetchColorService';
-import axios from "axios";
+
 import axiosWithAuth from "../helpers/axiosWithAuth";
 
 class BubblePage extends React.Component {
@@ -33,7 +33,7 @@ class BubblePage extends React.Component {
       .then(resp => {
         this.setState({
           ...this.state,
-          colors: this.state.colors.map(color => 
+          colors: this.state.colors.map(color =>
             color.id === editColor.id ? editColor : color
           )
         })
